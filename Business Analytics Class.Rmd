@@ -1,0 +1,57 @@
+---
+title: "Business Analytics Class"
+output: html_document
+date: "2023-09-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+getwd()
+x <- mtcars$wt
+y <- mtcars$mpg
+# Plot with main and axis titles
+# Change point shape (pch = 19) and remove frame.
+plot(x, y, main = "Main title",
+     xlab = "X axis title", ylab = "Y axis title",
+     pch = 19, frame = FALSE)
+# Add regression line
+plot(x, y, main = "Main title",
+     xlab = "X axis title", ylab = "Y axis title",
+     pch = 20, frame = FALSE)
+abline(lm(y ~ x, data = mtcars), col = "blue")
+
+
+
+```
+```{r}
+# load library tidyverse
+install.packages("tidyverse")
+library(tidyverse)
+
+# create dataframe of 26 character to
+# visualize the 26 characters
+df <- data.frame(p=c(0:25)) %>%
+  mutate(x = rep(seq_len(ceiling(n()/6)),
+                 each = 6,
+                 length.out = n())) %>%
+  group_by(x) %>%
+  mutate(y=1:n())
+
+# create plot using ggplot function
+# shape parameter is used to shape points
+ggplot(df, aes(x = x, y = y, shape = p)) +
+  scale_shape_identity() +
+  geom_point(size = 6, fill = "green") +
+
+  # geom_text function is used to label data points
+  # with pch value
+  geom_text(aes(x = x - 0.3, y = y,
+                label = paste0("pch =", p)), size = 5)
+
+
+```
+
+
