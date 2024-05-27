@@ -1,0 +1,74 @@
+---
+title: "Assignment 1: Setting Up R"
+description: "This assignment is completed and uploaded by Arvind Chaurasia"
+output: html_document
+date: "2023-09-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+###### The assignment is completed and uploaded by Arvind Kumar Chaurasia (Email id:achauras@kent.edu). This assignment will help in analyzing the role of descriptive statistics in data exploration phase of analytics projects.
+
+**1. Install the ISLR library using the install.packages() command. Call the library using the library(ISLR) command to ensure that the library is correctly installed**
+```{r}
+
+# Using the following code we will download the ISLR library and call it.
+#install.packages("ISLR")
+library("ISLR")
+```
+
+**2. Create a new R-Notebook (.Rmd) file. In the first code chunk, call the ISLR library and then print the summary of the Carseats dataset. How many observations (rows) this dataset contains?**
+```{r}
+
+# head() unction is used to view the first few rows of a data frame or a matrix. The summary() function is used to generate summary statistics for various types of data objects, such as data frames, vectors, and lists. In order to calculate number of rows in dataset we will use nrow().
+
+head(Carseats)
+summary(Carseats)
+nrow(Carseats)
+```
+
+**3. Using the summary statistics shown above, what is maximum value of the advertising attribute?**
+```{r}
+
+# To get the maximum value of the "Advertising" attribute, we will use the followings:
+
+max_advertising <- max(Carseats$Advertising)
+print(max_advertising)
+```
+
+**4. Calculate the IQR of the Price attribute. **
+```{r}
+
+# To calculate the Interquartile Range (IQR) of the "Price" attribute.
+
+iqr_price <- IQR(Carseats$Price)
+print(iqr_price)
+```
+
+**5. Plot the Sales against Price. What do you see in there? Calculate the correlation of the two attributes. What does the sign of the correlation coefficient suggest? **
+```{r}
+
+# Create a scatterplot of Sales against Price and using green color to represent plots.
+plot(Carseats$Price, Carseats$Sales, 
+     xlab = "Price", ylab = "Sales",
+     main = "Scatterplot of Sales vs. Price",
+     col = "Green")
+
+# To calculate the correlation between Sales and Price attributes, we will use the followings:
+correlation <- cor(Carseats$Sales, Carseats$Price)
+print(correlation)
+```
+A negative correlation coefficient between "Sales" and "Price" indicates a negative correlation between these two variables. In statistical terms, this means that as the "Price" of the product increases, the "Sales" tend to decrease, and vice versa.
+
+**6. Format your notebook file by providing description and document title. Also use # to add comments to your code.**
+
+All of the mentioned instruction was followed to complete this assignment. 
+
+**7. Knit the output file to html, pdf , word and submit the output document. **
+
+The R Markdown document was Knited and output was saved in pdf file. 
+
+
+
+
