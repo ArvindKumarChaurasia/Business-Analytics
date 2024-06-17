@@ -1,0 +1,350 @@
+---
+title: "Business Analytics Group Project"
+output: html_document
+date: "2023-12-08"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+***Group 1 Project By***
+
+*1.Arvind Kumar Chaurasia*, 
+
+*2.Gaurav Kudeshia*, 
+
+*3.Uma Maheshwar Godey*,
+
+*4.Anurodh Singh*
+
+---
+
+**Question**
+
+Zillow's Zestimate home valuation has shaken up the U.S. real estate industry since first released 11 years ago. A home is often the largest and most expensive purchase a person makes in his or her lifetime. Ensuring homeowners have a trusted way to monitor this asset is incredibly important. The Zestimate was created to give consumers as much information as possible about homes and the housing market, marking the first-time consumers had access to this type of home value information at no cost. "Zestimates" are estimated home values based on 7.5 million statistical and machine learning models that analyze hundreds of data points on each property. And, by continually improving the median margin of error (from 14% at the onset to 5% today), Zillow has since become established as one of the largest, most trusted marketplaces for real estate information in the U.S. and a leading example of impactful machine learning. This project is the very simplified version of Zillow Prize competition. Zillow Prize was a competition with a one-million-dollar grand prize with the objective to help push the accuracy of the Zestimate even further. Winning algorithms stand to impact the home values of 110M homes across the U.S.
+
+**Build a regression and decision tree model that can accurately predict the price of a house based on several predictors (you select appropriate features)**
+
+
+___
+
+Loading the dataset and viewing the first few rows. 
+```{r}
+data_frame = read.csv("/Users/arvindkc91/Desktop/Rhistory/House_Prices.csv")
+head(data_frame)
+```
+
+Finding the missing values in the data set, displaying the summary of the structure, and lastly displaying the summary of the data set. 
+```{r}
+miss_val <- colSums(is.na(data_frame))
+miss_val
+
+sum(is.na(data_frame))
+
+str(data_frame)
+
+summary(data_frame)
+```
+
+Calculating the correlation coefficient between the "SalePrice" variable and each of the other variables.
+
+```{r}
+correlation.coefficient1 <- cor(data_frame$SalePrice, data_frame$LotArea)
+cat("Correlation coefficient between Sale Price and Lot Area:", correlation.coefficient1, "\n")
+
+correlation.coefficient2 <- cor(data_frame$SalePrice, data_frame$OverallQual)
+cat("Correlation coefficient between Sale Price and Overall Quality:", correlation.coefficient2, "\n")
+
+correlation.coefficient3 <- cor(data_frame$SalePrice, data_frame$YearBuilt)
+cat("Correlation coefficient between Sale Price and Build year:", correlation.coefficient3, "\n")
+
+correlation.coefficient4 <- cor(data_frame$SalePrice, data_frame$YearRemodAdd)
+cat("Correlation coefficient between Sale Price and Year Remodeled:", correlation.coefficient4, "\n")
+
+correlation.coefficient5 <- cor(data_frame$SalePrice, data_frame$BsmtFinSF1)
+cat("Correlation coefficient between Sale Price and Finished Square feet:", correlation.coefficient5, "\n")
+
+correlation.coefficient6 <- cor(data_frame$SalePrice, data_frame$GarageArea)
+cat("Correlation coefficient between Sale Price and Garage Area:", correlation.coefficient6, "\n")
+
+correlation.coefficient7 <- cor(data_frame$SalePrice, data_frame$Fireplaces)
+cat("Correlation coefficient between Sale Price and No. of Fireplaces:", correlation.coefficient7, "\n")
+
+correlation.coefficient8 <- cor(data_frame$SalePrice, data_frame$TotRmsAbvGrd)
+cat("Correlation coefficient between Sale Price and Total rooms above ground:", correlation.coefficient8, "\n")
+```
+
+Now we will do some data exploration. 
+```{r}
+hist(data_frame$GarageArea, col = 'green')
+```
+
+Creating a density plot of sale prices
+```{r}
+suppressMessages(library(ggplot2))
+
+ggplot(data_frame, aes(x = SalePrice)) +
+  geom_density(fill = "green", color = "blue") +
+  labs(title = "Density Plot of Sale Prices", x = "Sale Price", y = "Density") + theme_minimal() + scale_x_continuous(labels = scales::comma)
+```
+
+
+Generating a bar plot showing the average sale price for each level of overall quality in our dataset.
+```{r}
+library(dplyr)
+avgp <- data_frame %>% group_by(OverallQual) %>% summarize(avg_SalePrice = mean(SalePrice))
+
+ggplot(avgp, aes(x = OverallQual, y = avg_SalePrice)) +
+  geom_bar(stat = "identity",fill = "green") +
+  labs(title = "Average Sale Price by Overall Quality", x = "Overall Quality", y = "Average Sale Price") + theme_minimal() + scale_x_continuous(labels = scales::comma)
+
+```
+
+Generating a histogram illustrating the distribution of houses based on their year of construction
+```{r}
+ggplot(data_frame, aes(x = YearBuilt)) +
+  geom_histogram(binwidth = 20, fill = "green", color = "blue") +
+  labs(title = "Frequency of Houses by their Year Built",
+       x = "Year of Builting the houses",
+       y = "Frequency of the houses") +
+  theme_minimal()
+```
+
+**Regression**
+```{r}
+reg_mod = lm(SalePrice ~., data = data_frame)
+summary(reg_mod)
+```
+
+As we know that low p-values (< 0.05) will make one variable as a statically insignificant. After selecting the significant variables we will again run our model. 
+```{r}
+reg_mod_1 = lm(SalePrice ~ LotArea+ OverallQual + YearRemodAdd + BsmtFinSF1 + BedroomAbvGr+ TotRmsAbvGrd + Fireplaces + GarageArea , data = data_frame)
+summary(reg_mod_1)
+```
+
+Now we will be making predictions using a trained regression model on new data and examining how well the model performs by comparing actual and predicted values.
+```{r}
+# Load the readxl library for reading Excel files
+library(readxl)
+
+# Read the Excel file into a data frame
+data_frame_predict = read_excel("/Users/arvindkc91/Desktop/Rhistory/BA-Predict-2.xlsx")
+
+# Use the predict function to make predictions based on the linear regression model (reg_mod)
+Predicted_SalePrice = predict(reg_mod_1, newdata = data_frame_predict)
+
+# Create a data frame with Actual_Price and Predicted_Price columns
+SalesPrice_table = data.frame(Actual_Price = data_frame_predict$SalePrice, Predicted_Price = Predicted_SalePrice)
+
+# Display the first few rows of the table
+head(SalesPrice_table)
+
+# Assuming 'SalesPrice_table' is your data frame
+library(ggplot2)
+
+# Scatter plot between Actual_Price and Predicted_Price with a regression line
+ggplot(SalesPrice_table, aes(x = Actual_Price, y = Predicted_Price)) +
+  geom_point(color = "blue", alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Add a regression line
+  labs(title = "Scatter Plot: Actual vs. Predicted Sale Prices",
+       x = "Actual Sale Price",
+       y = "Predicted Sale Price") +
+  theme_minimal()
+
+```
+
+To compare models, we use criteria such as R2_adj, RMSE, and MAE
+```{r}
+rsqu <- summary(reg_mod)$adj.r.squared
+rsqu
+
+rmse <- sqrt(mean((data_frame_predict$SalePrice - Predicted_SalePrice)^2))
+rmse
+
+mae <- mean(abs(data_frame_predict$SalePrice - Predicted_SalePrice))
+mae
+
+```
+
+
+___
+
+**Decision Tree**
+
+Building and summarizing a decision tree
+```{r}
+# Loading the rpart library for decision tree modeling
+library(rpart)
+
+# Building a decision tree regression model
+DecisionTree = rpart(SalePrice ~.,data = data_frame, method = 'anova')
+
+# Displaying a summary of the decision tree model
+summary(DecisionTree)
+```
+
+Now, Plotting our decision tree. Comparing actual and predicted Sale Prices for the new data.
+```{r}
+#install.packages("rattle")
+# Loading the rattle library for decision tree visualization
+library(rattle)
+
+# Visualizing the decision tree
+fancyRpartPlot(DecisionTree)
+
+# Making predictions on new data using the decision tree model
+Predicted_SalePrice_DT = predict(DecisionTree, newdata = data_frame_predict)
+
+# Creating a data frame with actual and predicted Sale Prices
+SalesPrice_table_DT = data.frame(Actual_Price = data_frame_predict$SalePrice, Predicted_Price = Predicted_SalePrice_DT)
+
+# Displaying the first few rows of the comparison table
+head(SalesPrice_table_DT)
+```
+
+Now, using RMSE and MAE, for the Decision Tree model to know how well the decision tree model is performing on the new data
+```{r}
+# Calculate Root Mean Squared Error (RMSE)
+DecisionTreea_rmse <- sqrt(mean((data_frame_predict$SalePrice - Predicted_SalePrice_DT)^2))
+DecisionTreea_rmse
+
+# Calculate Mean Absolute Error (MAE)
+DecisionTreea_mae <- mean(abs(data_frame_predict$SalePrice - Predicted_SalePrice_DT))
+DecisionTreea_mae
+
+```
+
+___
+
+**Use classification to model OverallQual (rating 7 and above is considered as class 1, otherwise class zero)**
+
+
+**Classification**
+
+```{r}
+# Creating a new binary variable "label" based on the condition
+data_frame$label = as.factor(ifelse(data_frame$OverallQual >= 7, 1, 0))
+
+summary(data_frame)
+```
+
+Now using Logistic Regression which is a classification technique.
+```{r}
+#Model
+logis_ClassModel = glm(label ~ LotArea + YearBuilt + YearRemodAdd + BsmtFinSF1 + FullBath + HalfBath + BedroomAbvGr + TotRmsAbvGrd + Fireplaces + GarageArea + YrSold + SalePrice ,data = data_frame, family = "binomial")
+
+#Displaying Summary
+summary(logis_ClassModel)
+```
+
+
+```{r}
+#Model with appropriate feature
+logis_ClassModel_1 = glm(label ~ LotArea + BsmtFinSF1 + SalePrice ,data = data_frame, family = "binomial")
+
+#Displaying Summary
+summary(logis_ClassModel_1)
+```
+
+
+Now making prediction of prices and plotting an ROC curve
+```{r}
+# Creating a binary variable "label" based on the condition for prediction
+data_frame_predict$label = as.factor(ifelse(data_frame_predict$OverallQual >= 7, 1, 0))
+
+# Predicting the probabilities using the logistic regression model
+OverallQualityPrediction = predict(logis_ClassModel, newdata = data_frame_predict, type='response')
+
+# Loading the pROC library
+library(pROC)
+
+# Creating an ROC curve
+roc_curve <- roc(data_frame_predict$label, OverallQualityPrediction)
+
+# Ploting the ROC curve
+plot(roc_curve, main = "ROC Curve", col = "green", lwd = 2)
+
+# Adding AUC (Area Under the Curve) to the plot
+auc_value <- auc(roc_curve)
+text(0.7, 0.5, paste("AUC =", round(auc_value, 3)), col = "blue", cex = 1.2)
+
+```
+
+Confusion Matrix
+```{r}
+suppressMessages(library(caret))
+
+# Converting predicted probabilities to binary predictions based on a threshold of 0.5
+Predicted = as.factor(ifelse(OverallQualityPrediction > 0.5,1,0))
+
+# Creating a confusion matrix
+ConfuMatrix  = confusionMatrix(Predicted,data_frame_predict$label)
+
+ConfuMatrix
+```
+___
+
+**Conclusion**
+
+After carefully observing the different parameters responsible for determining the Sales Price of a house and their descriptive statistics as shown below:
+
+•	LotArea:
+-	Range: The minimum lot area is 1491 square feet, and the maximum is 215,245 square feet.
+-	Distribution: The mean lot area is approximately 10,795 square feet, with a median (50th percentile) of 9,442 square feet.
+
+•	OverallQual (Overall Quality):
+-	Range: The overall quality ranges from 1 (lowest) to 10 (highest).
+-	Distribution: The mean overall quality is approximately 6.136, with a median of 6.000.
+
+•	YearBuilt:
+-	Range: Houses in the dataset were built between 1880 and 2010.
+-	Distribution: The mean year of construction is around 1971, with a median of 1973.
+
+•	YearRemodAdd (Year of Remodeling or Addition):
+-	Range: Remodeling or additions occurred between 1950 and 2010.
+-	Distribution: The mean year of remodeling or addition is approximately 1985, with a median of 1994.
+
+•	BsmtFinSF1 (Basement Finished Square Feet):
+-	Range: Basement finished square feet range from 0 to 2260.
+-	Distribution: The mean finished square feet is 446.5, and the median is 384.0.
+
+•	FullBath, HalfBath:
+-	Range: Full baths range from 0 to 3, while half baths range from 0 to 2.
+-	Distribution: On average, houses have around 1.564 full baths and 0.386 half baths.
+•	BedroomAbvGr (Bedrooms Above Ground):
+-	Range: The number of bedrooms above ground ranges from 0 to 8.
+-	Distribution: The mean is approximately 2.843 bedrooms, with a median of 3.000.
+
+•	TotRmsAbvGrd (Total Rooms Above Ground):
+-	Range: Total rooms above ground range from 2 to 14.
+-	Distribution: The mean is approximately 6.482 rooms, with a median of 6.000.
+
+•	Fireplaces:
+-	Range: The number of fireplaces ranges from 0 to 3.
+-	Distribution: On average, houses have around 0.628 fireplaces.
+
+•	GarageArea:
+-	Range: Garage areas range from 0 to 1390 square feet.
+-	Distribution: The mean garage area is 472.6 square feet, with a median of 480.0.
+
+•	YrSold:
+-	Range: Houses were sold between 2006 and 2010.
+-	Distribution: The mean year of sale is approximately 2008.
+
+•	SalePrice:
+-	Range: Sale prices range from $34,900 to $755,000.
+-	Distribution: The mean sale price is $183,108, with a median of $163,000
+
+
+	From these parameters and our algorithm results we can ascertain that the significant factors out of all the given parameters are: LotArea Overall Quality, 'YearRemodAdd' that is Remodel Date Year, 'BsmtFinSF1' that is Finished square feet, 'BedroomAbvGr' that is Number of Bedrooms above the ground, 'TotRmsAbvGrd' Number of rooms above the ground, Number of fireplaces and Size of garage in square feet. 
+
+	We are considering these factors as the significant ones because the the p-value for all these factors is less than 0.05((p-value) < 0.05). This result is obtained from Regression model using the lm function.
+
+	The results also describe that the value of SalesPrice is increasing with the increase in value of LotArea Overall Quality, 'YearRemodAdd' that is Remodel Date Year, 'BsmtFinSF1' that is Finished square feet, 'BedroomAbvGr' that is Number of Bedrooms above the ground, 'TotRmsAbvGrd' Number of rooms above the ground, Number of fireplaces and Size of garage in square feet which can be noted with the help of the correlation coefficients stating a positive and non zero value.
+
+	The maximum increase is observed with  the increase in Overall Quality with the correlation coefficient value of 0.7962135.
+
+___
