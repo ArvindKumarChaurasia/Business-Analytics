@@ -10,15 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ---
 
-***Group 1 Project By***
-
 *1.Arvind Kumar Chaurasia*, 
-
-*2.Gaurav Kudeshia*, 
-
-*3.Uma Maheshwar Godey*,
-
-*4.Anurodh Singh*
 
 ---
 
